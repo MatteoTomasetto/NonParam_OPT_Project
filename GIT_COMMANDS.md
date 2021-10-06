@@ -11,5 +11,5 @@ git pull  # update the folder and files on own PC
 git add -A                       # add all files on remote folder
 git add "file_name.extension"    # add one file on remote folder
 git commit -m "Commit_text"      # commit a change
-git push origin master           # update the remote folder on github 
+git push origin head:master      # update the remote folder on github 
 
