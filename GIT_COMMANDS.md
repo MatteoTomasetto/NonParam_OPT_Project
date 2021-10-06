@@ -8,7 +8,8 @@ cd "C:/Users/matte/Desktop/NonParam_OPT_Project"  # select the wanted directory
 
 git pull  # update the folder and files on own PC
 
-git add [file]
-
-
+git add -A 
+git add "file_name.extension"
+git commit -m "Commit_text"
+git push origin master 
 
