@@ -1,5 +1,6 @@
 ## Clone the github directory
 cd "C:/Users/matte/Desktop"  # set the path where we want to add the directory
+
 git clone https://github.com/teotom10/NonParam_OPT_Project.git
 
 ## Commands to update the files
