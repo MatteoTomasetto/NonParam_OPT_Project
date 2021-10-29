@@ -45,3 +45,115 @@ names(df)[163] = "Bacteria%"
 names(df)[171] = "Bacteria5%"
 
 # idx_out <- [19, 34, 36]
+
+#cols 1-32
+#col 9 (Hisp)-> vuoto è diventato NA perchè il paziente non ha voluto rispondere
+df$Hisp[which(df$Hisp !='No ' & df$Hisp!='Yes')]=NA
+df$Hisp<-as.character(df$Hisp)
+df$Hisp<- as.factor(df$Hisp)
+
+#col 14 (BL.Diab.Type): NA sostituiti con "no diab" 
+df$BL.Diab.Type<-as.character(df$BL.Diab.Type)
+df$BL.Diab.Type[is.na(df$BL.Diab.Type)] <- 'no diab'
+df$BL.Diab.Type<- as.factor(df$BL.Diab.Type)
+
+#col 16 (Use.Tob)-> vuoto è diventato NA perchè il paziente non ha voluto rispondere
+df$Use.Tob[which(df$Use.Tob!='No ' & df$Use.Tob!='Yes')]=NA
+df$Use.Tob<-as.character(df$Use.Tob)
+df$Use.Tob<- as.factor(df$Use.Tob)
+
+
+#col 17 (BL.Cig.Day): ho sostituito NA con 0 per chi non fuma e lasciato na per chi 
+#fuma o non ha risposto
+df$BL.Cig.Day[which(df$Use.Tob=='No ')]<- 0
+
+
+#col 18 (Use.Alc)-> vuoto è diventato NA perchè il paziente non ha voluto rispondere
+df$Use.Alc[which(df$Use.Alc!='No ' & df$Use.Alc!='Yes')]=NA
+df$Use.Alc<-as.character(df$Use.Alc)
+df$Use.Alc<- as.factor(df$Use.Alc)
+
+
+#col 19 (BL.Drks.Day): ho sostituito NA con 0 per chi non beve e lasciato na per chi 
+#beve o non ha risposto
+df$BL.Drks.Day[which(df$Use.Alc=='No ')]<- 0
+#NB: ci sono alcuni che usano alcol ma che bevono 0 drink al giorno-> cosa fare?
+
+
+#col 20 (Drug.Add)-> vuoto è diventato NA perchè il paziente non ha voluto rispondere
+df$Drug.Add[which(df$Drug.Add!='No ' & df$Drug.Add!='Yes')]=NA
+df$Drug.Add<-as.character(df$Drug.Add)
+df$Drug.Add<- as.factor(df$Drug.Add)
+
+#col 22 (N.prev.preg): ho sostituito NA con 0 per chi non ha avuto gravidanze e 
+#lasciato na per chi ne ha avute e non ha risposto
+df$N.prev.preg[which(df$Prev.preg=='No ')]<- 0
+
+#col 23 (Live.PTB): na sostituiti con no previous pregnancies
+df$Live.PTB<-as.character(df$Live.PTB)
+df$Live.PTB[which(df$Prev.preg == 'No ')]<-'NoPrevPreg'
+df$Live.PTB<-as.factor(df$Live.PTB)
+
+#col 24 (Any.stillbirth): na sostituiti con no previous pregnancies
+df$Any.stillbirth<-as.character(df$Any.stillbirth)
+df$Any.stillbirth[which(df$Prev.preg == 'No ')]<-'NoPrevPreg'
+df$Any.stillbirth<-as.factor(df$Any.stillbirth)
+
+#col 25 (Spont.ab): na sostituiti con no previous pregnancies e vuoti sostituiti con
+#NA (vuoto= ha avuto precedenti gravidanze (col 21), ma qui non ha risposto)
+df$Spont.ab<-as.character(df$Spont.ab)
+df$Spont.ab[which(df$Prev.preg == 'No ')]<-'NoPrevPreg'
+df$Spont.ab[which(df$Spont.ab != 'Yes' & df$Spont.ab != 'No ' & df$Prev.preg == 'Yes')]<-NA
+df$Spont.ab<-as.factor(df$Spont.ab)
+
+#col 26 (Induced.ab): na sostituiti con no previous pregnancies e vuoti sostituiti con
+#NA (vuoto= ha avuto precedenti gravidanze (col 21), ma qui non ha risposto)
+df$Induced.ab<-as.character(df$Induced.ab)
+df$Induced.ab[which(df$Prev.preg == 'No ')]<-'NoPrevPreg'
+df$Induced.ab[which(df$Induced.ab != 'Yes' & df$Induced.ab != 'No ' & df$Prev.preg == 'Yes')]<-NA
+df$Induced.ab<-as.factor(df$Induced.ab)
+
+
+#col 27 (Any.live.ptb.sb.sp.ab.in.ab): inserito un terzo livello per le donne che 
+#non hanno mai avuto una gravidanza (NA sostituito con NoPrevPreg)
+df$Any.live.ptb.sb.sp.ab.in.ab<-as.character(df$Any.live.ptb.sb.sp.ab.in.ab)
+df$Any.live.ptb.sb.sp.ab.in.ab[which(df$Prev.preg == 'No ')] <- 'NoPrevPreg'
+df$Any.live.ptb.sb.sp.ab.in.ab<-as.factor(df$Any.live.ptb.sb.sp.ab.in.ab)
+
+
+#col 28 (N.living.kids): NA sostituiti con 0 per donne che non hanno figli, 
+#NA lasciati NA per donne con figli che non hanno specificato quanti erano vivi 
+#at baseline
+df$N.living.kids[which(df$Prev.preg == 'No ')] <- 0
+
+
+#col 29 (Tx.comp.): vuoto-> 'withdrawn' (ritirato) if group=T 
+#NA->'Notherapy' if group=C =>a seconda del valore della varaibile 3 (Group). 
+df$Tx.comp.<-as.character(df$Tx.comp.)
+df$Tx.comp.[which(df$Group == 'T' & df$Tx.comp. != 'Yes' & df$Tx.comp. != 'No ' & df$Tx.comp. != 'Und')] <-'Withdrawn'
+df$Tx.comp.[which(df$Group == 'C' )] <-'NoTherapy'
+df$Tx.comp.<-as.factor(df$Tx.comp.)
+
+
+#col 30 (Local.anes): na->notherapy; no-> distinzione tra chi non ha fatto l'anestesia locale
+#e chi si è ritirato dal trattamento (informazione alla colonna 29)
+df$Local.anes<-as.character(df$Local.anes)
+df$Local.anes[which(df$Group == 'C')]<-'NoTherapy'
+df$Local.anes[which(df$Tx.comp. == 'Withdrawn' & df$Local.anes == 'No ')]<-'Withdrawn'
+df$Local.anes<-as.factor(df$Local.anes)
+
+
+#col 31 (Topical.Anest): na->notherapy; no-> distinzione tra chi non ha fatto la topical anestesia 
+#e chi si è ritirato dal trattamento (informazione alla colonna 29)
+df$Topical.Anest<-as.character(df$Topical.Anest)
+df$Topical.Anest[which(df$Group == 'C')]<-'NoTherapy'
+df$Topical.Anest[which(df$Tx.comp. == 'Withdrawn' & df$Topical.Anest == 'No ')]<-'Withdrawn'
+df$Topical.Anest<-as.factor(df$Topical.Anest)
+
+
+#col 32 (Tx.time): NA-> distinzione tra chi non ha fatto la terapia->0
+#e chi si è ritirato ->NA
+sum(is.na(df$Tx.time))
+df$Tx.time[which(df$Group == 'C')]<-0
+df$Tx.time[which(df$Tx.comp. == 'Withdrawn' & df$Group == 'T')]<-NA
+
