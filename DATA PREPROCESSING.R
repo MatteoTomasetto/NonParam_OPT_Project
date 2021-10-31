@@ -115,6 +115,61 @@ df$Tx.time[which(df$Group == 'C')]<-0
 df$Tx.time[which(df$Tx.comp. == 'Withdrawn' & df$Group == 'T')]<-NA
 
 
+
+
+
+
+library(corrplot)
+
+################## dalla 33 alla 68
+
+#33
+levels(df$EDC.necessary.)
+sum(is.na(df$EDC.necessary.))
+df$EDC.necessary.[which(df$EDC.necessary.== blank)]<-NA
+df$EDC.necessary.=factor(df$EDC.necessary.)
+
+
+#34 non serve
+
+#35 già apposto
+
+#36 non serve
+
+#dalla 37 alla 68 apposto: i missing data sono già come NA
+
+# guardo le correlazioni delle colonne delle visite (SEZIONE PERIODONOTAL SUMMARIES)
+x11()
+corrplot(cor(df[,37:68],use='na.or.complete'))
+title('correlation of 37-68')
+#vediamo che ci sono dei chiari pattern => possiamo trascurare qualche covariata
+#zoomiamo il grafico
+x11()
+corrplot(cor(df[,37:47],use='na.or.complete'))
+x11()
+pairs(df[,37:47])
+x11()
+pairs(df[,48:58])
+# vediamo che le terne di variabili _avg,_4,_5 sono spesso fortemente correlate.
+#questo vale anche per le altre (dalla 38 alla 68) quindi potremmo decidere di tenere solo avg?
+#lo vediamo anche dal pairs
+
+#altre correlazioni tra qtà calcolato tra terza e quinta visita
+correlazioni<-cor(df[,37:68],use='na.or.complete')
+
+correlazioni['V3.Calc.I','V5.Calc.I'] #0.99
+correlazioni['V3.CAL.avg','V5.CAL.avg'] #0.88
+correlazioni['V3.PD.avg','V5.PD.avg'] #0.86
+
+
+
+
+
+
+
+
+
+
 blank = levels(df[,70])[1]
 
 idx_NA = which(df[,70] == blank)
