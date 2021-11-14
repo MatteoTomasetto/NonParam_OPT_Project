@@ -7,3 +7,5 @@ setwd("C:/Users/matte/Desktop/NonParam_OPT_Project")
 #setwd("C:/Users/laura/Desktop/NonParam_OPT_Project")
 
 source("DATA PREPROCESSING.R")
+
+source("TEST.R")

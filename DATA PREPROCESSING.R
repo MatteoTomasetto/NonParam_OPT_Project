@@ -123,6 +123,8 @@ library(corrplot)
 
 ################## dalla 33 alla 68
 
+blank = levels(df[,70])[1]
+
 #33
 levels(df$EDC.necessary.)
 sum(is.na(df$EDC.necessary.))
@@ -169,8 +171,6 @@ correlazioni['V3.PD.avg','V5.PD.avg'] #0.86
 
 
 
-
-blank = levels(df[,70])[1]
 
 idx_NA = which(df[,70] == blank)
 df[idx_NA,70] = NA
