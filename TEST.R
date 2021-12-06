@@ -174,8 +174,8 @@ perm_manova = function(outcome,group,iter=1e3){
 ############################## T-test univariate #############################
 ##############################################################################
 
-idx_Var = 34
-idx_Group = 175
+idx_Var = 47
+idx_Group = 70
 groups = levels(df[,idx_Group])
 
 # discard NA
@@ -207,16 +207,16 @@ if(length(idx_NA_Var)!=0 & length(idx_NA_Group)!=0) {
 }
 
 # Set threshold for numerical variable if wanted
-#threshold = 50
-#x = x[which(x >= threshold)]
-#y = y[which(y >= threshold)]
+threshold = 50
+x = x[which(x >= threshold)]
+y = y[which(y >= threshold)]
 
 # Comparison with parametric case
-#hist(x)
-#hist(y)
-#shapiro.test(x)
-#shapiro.test(y)
-#t.test(x,y)
+hist(x)
+hist(y)
+shapiro.test(x)
+shapiro.test(y)
+t.test(x,y)
 
 # test
 if(is.factor(df[,idx_Var])==TRUE){
@@ -337,7 +337,7 @@ perm_manova(Var_test,Group_test)
 # 36) Bacteria5 (155);     //           Low-weight Y/N (175); t_test_median;      0.623;
 # 37) Antibodies (173);    //           Pre-term Y/N (70);    t_test_mean/median; 0.036/0.015;
 # 38) Antibodies (173);    //           Low-weight Y/N (175); t_test_mean/median; 0.0302/0.3;
-
+# Unfortunately the Gingival index at visit 1/3/5 are not significant for Pre-term Y/N and Low-weight Y/N
 
 ##############################################################################
 ################################ CONCLUSIONS ################# ################

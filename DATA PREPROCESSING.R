@@ -219,6 +219,6 @@ df <- cbind(df,Delivery_time_survival)
 
 names(df)[145] = "Bacteria"
 names(df)[155] = "Bacteria5"
-names(df)[163] = "Bacteria%"
-names(df)[171] = "Bacteria5%"
+names(df)[163] = "Bacteria.perc"
+names(df)[171] = "Bacteria5.perc"
 
