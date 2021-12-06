@@ -130,7 +130,10 @@ df$EDC.necessary.[which(df$EDC.necessary.== blank)]<-NA
 df$EDC.necessary.=factor(df$EDC.necessary.)
 
 
-#34 non serve
+#34
+levels(df$Completed.EDC)
+df$Completed.EDC[which(df$Completed.EDC== blank)]<-NA
+df$Completed.EDC=factor(df$Completed.EDC)
 
 #35 già apposto
 
@@ -200,11 +203,20 @@ for (i in 104:135){
 Apgar_bin = df[,74]
 Apgar_bin[which(df[,74]>=7)] = 0  
 Apgar_bin[which(df[,74]<7)] = 1 
+df <- cbind(df, Apgar_bin)
 
 # Antibodies: Antibodies = sum of the antibodies wrt different bacteria at visit 1
 Antibodies = df[,104] + df[,105] +  df[,106] + df[,107] + df[,108] + df[,109] +  df[,110]
 # Antibodies5: Antibodies5 = sum of the antibodies wrt different bacteria at visit 5
 Antibodies5 = df[,120] + df[,121] +  df[,122] + df[,123] + df[,124] + df[,125] +  df[,126]
+df <- cbind(df, Antibodies, Antibodies5)
+
+# Birthweight_bin: Birthweight_bin == 0 se nascita non prematura, Birthweight_bin == 1 se nascita prematura
+Birthweight_bin = df[,72]
+Birthweight_bin[which(df[,72]>=2500)] = 0  
+Birthweight_bin[which(df[,72]<2500)] = 1 
+Birthweight_bin <- factor(Birthweight_bin)
+df <- cbind(df, Birthweight_bin)
 
 names(df)[145] = "Bacteria"
 names(df)[155] = "Bacteria5"
