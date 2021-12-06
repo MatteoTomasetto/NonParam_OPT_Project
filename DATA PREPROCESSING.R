@@ -170,14 +170,10 @@ correlazioni<-cor(df[,37:68],use='na.or.complete')
 
 
 
-
-
-
-
-
 idx_NA = which(df[,70] == blank)
 df[idx_NA,70] = NA
 df[,70] = factor(df[,70])    # It removes " " from the levels
+Delivery_time_survival <- df[,71]
 df[idx_NA,71] = NA           # NA if Gestional Age == time of the last visit 
 
 for(i in 78:88){
@@ -217,6 +213,9 @@ Birthweight_bin[which(df[,72]>=2500)] = 0
 Birthweight_bin[which(df[,72]<2500)] = 1 
 Birthweight_bin <- factor(Birthweight_bin)
 df <- cbind(df, Birthweight_bin)
+
+# Delivery_time_survival: gestional ages with also censored times
+df <- cbind(df,Delivery_time_survival)
 
 names(df)[145] = "Bacteria"
 names(df)[155] = "Bacteria5"
