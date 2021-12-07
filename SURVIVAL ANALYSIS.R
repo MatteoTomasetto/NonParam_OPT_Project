@@ -105,11 +105,11 @@ hazard_ratio_threshold
 ################################# COX MODEL ##################################
 ##############################################################################
 
-cov1 <- df$BL.Calc.I  # select covariates significant for the delivery time
+cov1 <- df$BMI # select covariates significant for the delivery time
 cox <- coxph(Surv(times, censoring=="Event") ~ cov1)
 summary(cox)
 x11()
-ggforest(cox, data = as.data.frame(cbind(cov1,cov2,times,censoring)))
+ggforest(cox, data = as.data.frame(cbind(cov1,times,censoring)))
 
 # Baseline survival curve
 x11()
@@ -120,7 +120,7 @@ plot(survfit(cox, data=as.data.frame(cbind(cov1,cov2,times,censoring))),
 grid()
 
 # Plot the survival curve for different values of a covariate
-cov_values <- data.frame(cov1 = c(min(cov1),mean(cov1),max(cov1)))
+cov_values <- data.frame(cov1 = c(min(cov1[which(!is.na(cov1))]),mean(cov1[which(!is.na(cov1))]),max(cov1[which(!is.na(cov1))])))
 KM_cov <- survfit(cox, newdata = cov_values)
 x11()
 plot(KM_cov, conf.int=F,
@@ -132,11 +132,11 @@ legend('bottomleft', c("min", "mean", "max"),
        lty=c(1,1,1), lwd=c(2,2,2), col=c("dodgerblue2","navy","darkmagenta"))
 
 ### Consider the pre-term births only
-cov1_threshold <- df$BL.Calc.I[which(times <= threshold)]  # select covariates significant for the delivery time (see permutational inference results)
+cov1_threshold <- df$BMI[which(times <= threshold)]  # select covariates significant for the delivery time (see permutational inference results)
 cox_threshold <- coxph(Surv(times_threshold, censoring_threshold=="Event") ~ cov1_threshold)
 summary(cox_threshold)
 x11()
-ggforest(cox_threshold, data = as.data.frame(cbind(cov1_threshold,cov2_threshold,times_threshold,censoring_threshold)))
+ggforest(cox_threshold, data = as.data.frame(cbind(cov1_threshold,times_threshold,censoring_threshold)))
 
 # Plot baseline survival curve
 plot(survfit(cox_threshold, data=as.data.frame(cbind(cov1_threshold,cov2_threshold,times_threshold,censoring_threshold))), 
@@ -146,7 +146,7 @@ plot(survfit(cox_threshold, data=as.data.frame(cbind(cov1_threshold,cov2_thresho
 grid()
 
 # Plot the survival curve for different values of a covariate
-cov_values_threshold <- data.frame(cov1_threshold = c(min(cov1_threshold),mean(cov1_threshold),max(cov1_threshold)))
+cov_values_threshold <- data.frame(cov1_threshold = c(min(cov1_threshold[which(!is.na(cov1_threshold))]),mean(cov1_threshold[which(!is.na(cov1_threshold))]),max(cov1_threshold[which(!is.na(cov1_threshold))])))
 KM_cov_threshold <- survfit(cox_threshold, newdata = cov_values_threshold)
 x11()
 plot(KM_cov_threshold, conf.int=F,
@@ -186,9 +186,67 @@ test.ph_threshold
 
 # a) Looking at the pre-term births only, we have a significance difference for the survivals curve
 #    in Control and Treatment groups. Moreover being in the Control group is a risk factor.
-# b) Risk factor as hypertension, diabetes, tobacco, hisp give more pre-term births 
+# b) Risk factors as hypertension, diabetes, tobacco, hisp give births previously. 
 # c) Completed EDC, EDC necessary, previous pregnancies, alcohol, drug, Blank race do not give different survival curves
 
-# PROBLEM: Gingival indexes and Bacteria5.perc in the cox model are protective factor wrt pre-term birth
-# Magari trattamento aiuta a prevenire come visto in permutational inference e survival analysis ma non c'è rapporto diretto batteri/gengive-nascita prematura
-# E' comunque strano che indici gengivali danno effetto opposto a quello sperato.
+# COVARIATE       THRESHOLD      PVALUE COX MODEL        HAZARD RATIO
+# AGE             //             0.934                   1.001
+# BMI             //             0.0362                  1.011
+# BL.GE           <=230          0.0465                  0.4356
+# BL.PD.avg       <=230          0.0388                  0.4965
+# V3.Calc.I       <=230          0.0594                  4.293 
+# V3.Calc.I       <=235          0.0796                  3.22
+# V3.Calc.I       <=260          0.101                   1.346
+
+# a) BMI is a risk factor; Age is not a risk factor
+
+# b) Gingival indexes and Bacteria5.perc in the COX model are protective factor wrt pre-term birth. 
+#    This is strange and counter-intuitive, a possible explaination is given by the NA's and the point (ii) below.
+
+# c) If we apply a threshold (i.e. looking at severe pre-term births only) we notice that the gingival factors
+# at the baseline (BL) are still protective but they become risky when measured at visit 3 (V3).
+# This is coherent with the treatment effect: 
+# (i)  treated patients have lower indeces in V3 (reduction in the oral infection) and these indeces in V3 are risk factors 
+#      ==> treatment helps to have less pre-term births (we have these risk factors smaller after treatment)
+# (ii) Unfortunately we have a lot of NA's in V3 and V5, it's difficult to assess that they are risk factors in general.
+#      We notice that ginigval indeces at the baseline BL are protective factors, indeed:
+#      
+#      higher indeces at BL ==> treatment ==> improvement of oral health ==> less pre-term births since it is protective.
+#
+#      Hence having a bad situation at BL (high indeces) results in a protective factor thanks to the treatment.
+
+
+# Data analysis for gengival indeces
+control.BL.GE <- df$BL.GE[which(df$Group == 'C')]
+treat.BL.GE <- df$BL.GE[which(df$Group == 'T')]
+control.BL.Calc.I <- df$BL.Calc.I[which(df$Group == 'C')]
+treat.BL.Calc.I <- df$BL.Calc.I[which(df$Group == 'T')]
+control.V3.GE <- df$V3.GE[which(df$Group == 'C')]
+treat.V3.GE <- df$V3.GE[which(df$Group == 'T')]
+control.V5.GE <- df$V5.GE[which(df$Group == 'C')]
+treat.V5.GE <- df$V5.GE[which(df$Group == 'T')]
+control.V5.PD.avg <- df$V5.PD.avg[which(df$Group == 'C')]
+treat.V5.PD.avg <- df$V5.PD.avg[which(df$Group == 'T')]
+
+summary(control.BL.GE)
+summary(treat.BL.GE)
+boxplot(control.BL.GE, treat.BL.GE)
+
+summary(control.BL.Calc.I)
+summary(treat.BL.Calc.I)
+boxplot(control.BL.Calc.I, treat.BL.Calc.I)
+
+summary(control.V3.GE)
+summary(treat.V3.GE)
+boxplot(control.V3.GE, treat.V3.GE)
+
+summary(control.V5.GE)
+summary(treat.V5.GE)
+boxplot(control.V5.GE, treat.V5.GE)
+
+summary(control.V5.PD.avg)
+summary(treat.V5.PD.avg)
+boxplot(control.V5.PD.avg, treat.V5.PD.avg)
+
+# Treatment improve the oral health: indeed, at visit V3 and V5 (after some treatments), the indeces are lower!
+# Moreover patients with high indeces at the BL are treated (treated group has higher indeces at the BL) --> we could assess it by a permutational test
