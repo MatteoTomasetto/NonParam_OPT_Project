@@ -178,7 +178,7 @@ test.ph_threshold
 
 # GROUP               THRESHOLD    PVALUE LOG-RANK TEST      HAZARD RATIO
 # Treat/Control       <=230        0.03                      0.5 
-# Hips Y/N            //           0.02                      0.83
+# Hisp Y/N            //           0.02                      0.83
 # Pubblic Asstce Y/N  //           0.04                      1.16
 # Hypertension Y/N    //           6e-06                     2.36
 # Diabetes Y/N        //           2e-04                     2.06
@@ -188,6 +188,8 @@ test.ph_threshold
 #    in Control and Treatment groups. Moreover being in the Control group is a risk factor.
 # b) Risk factors as hypertension, diabetes, tobacco, hisp give births previously. 
 # c) Completed EDC, EDC necessary, previous pregnancies, alcohol, drug, Blank race do not give different survival curves
+# d) Pubblic assistance (delivery is paid by the government) is a risk factor: indeed with pubblic assistance even poor people can afford a delivery 
+#    and they have typically bad health conditions; while without pubblic assistance we are considering mainly rich people that are usually more healthy (they can afford extra medical expenses)
 
 # COVARIATE       THRESHOLD      PVALUE COX MODEL        HAZARD RATIO
 # AGE             //             0.934                   1.001

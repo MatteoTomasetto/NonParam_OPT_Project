@@ -175,7 +175,7 @@ perm_manova = function(outcome,group,iter=1e3){
 ##############################################################################
 
 idx_Var = 47
-idx_Group = 70
+idx_Group = 3
 groups = levels(df[,idx_Group])
 
 # discard NA
@@ -337,18 +337,33 @@ perm_manova(Var_test,Group_test)
 # 36) Bacteria5 (155);     //           Low-weight Y/N (175); t_test_median;      0.623;
 # 37) Antibodies (173);    //           Pre-term Y/N (70);    t_test_mean/median; 0.036/0.015;
 # 38) Antibodies (173);    //           Low-weight Y/N (175); t_test_mean/median; 0.0302/0.3;
-# Unfortunately the Gingival index at visit 1/3/5 are not significant for Pre-term Y/N and Low-weight Y/N
+# 39) BL GE (38);          //           Control/Treat (3);    t_test_mean/median; 0.337/0.339;
+# 40) BL PD avg (40);      //           Control/Treat (3);    t_test_mean/median; 0.110/0.16;
+# 41) BL CAL avg (43);     //           Control/Treat (3);    t_test_mean/median; 0.103/0.038;
+# 42) BL Calc I (46);      //           Control/Treat (3);    t_test_mean/median; 0.676/0.547;
+# 43) BL Pl I (47);        //           Control/Treat (3);    t_test_mean/median; 0.641/1;
+# 44) V3 GE (48);          //           Control/Treat (3);    t_test_mean/median; 0/0;
+# 45) V3 PD avg (50);      //           Control/Treat (3);    t_test_mean/median; 0/0;
+# 46) V3 CAL avg (53);     //           Control/Treat (3);    t_test_mean/median; 0/0.296;
+# 47) V3 Calc I (56);      //           Control/Treat (3);    t_test_mean/median; 0/0;
+# 48) V3 Pl I (57);        //           Control/Treat (3);    t_test_mean/median; 0/0; 
+# 49) V5 GE (58);          //           Control/Treat (3);    t_test_mean/median; 0/0;
+# 50) V5 PD avg (60);      //           Control/Treat (3);    t_test_mean/median; 0/0;
+# 51) V5 CAL avg (63);     //           Control/Treat (3);    t_test_mean/median; 0/0.088;
+# 52) V5 Calc I (66);      //           Control/Treat (3);    t_test_mean/median; 0/0;
+# 53) V5 Pl I (67);        //           Control/Treat (3);    t_test_mean/median; 0/0; 
+# Unfortunately the Gingival index at visit 1/3/5 are not significant for Pre-term Y/N and Low-weight Y/N 
 
 ##############################################################################
-################################ CONCLUSIONS ################# ################
+################################ CONCLUSIONS #################################
 ##############################################################################
 
 # a) Our outcomes (Birthweight and gestional age) are differently distributed in the Control and Treatment groups,
 # therefore there is an effect of the treatment on these risks (low weight and pre-term birth); this effect is positive
 # since treated patients show higher birthweights and higher delivery times (see boxplots) ==> treatment reduces these risks.
-# Notice thath, to see this difference, we have considered severe outcomes only!
+# Notice that, to see this difference, we have considered severe outcomes only with the threshold!
 
-# b) Some variables of dental health are naturally different in Control and Treat. grousp since treatment is required for severe patients 
+# b) Some variables of dental health are naturally different in Control and Treat. groups since treatment is required for severe patients 
 # and it improves dental health reducing for example the amount of bacteria.
 
 # c) We can see which features contribute to have pre-term birth and low birthweight from the pvalue above:
