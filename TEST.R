@@ -170,6 +170,62 @@ perm_manova = function(outcome,group,iter=1e3){
   return(p_val) 
 }
 
+
+correlation_matrix = function(x){   # x = dataframe
+  p <- dim(x)[2]
+  isfactor <- c()
+  
+  for(k in 1:p){
+    isfactor[k] <- ifelse(is.factor(x[,k])==TRUE,1,0)
+  }
+  
+  corr_matrix <- matrix(NA,p,p)
+  for(i in 1:p){
+    for(j in 1:p){
+      if(i==j){ 
+        corr_matrix[i,j] = 1
+      } else {
+        
+        if(isfactor[i]==0 & isfactor[j]==0){
+          # Sperman's correlation coefficient if the 2 variables are continuous
+          corr_matrix[i,j] = cor(x[,i], x[,j], method = c("spearman"))
+          # Alternative: Kendall's correlation coefficient if the 2 variables are continuous
+          # corr_matrix[i,j] = cor(x[,i], x[,j], method = c("kendall"))
+          corr_matrix[j,i] = corr_matrix[i,j]
+        }
+        if(isfactor[i]==0 & isfactor[j]==1){
+          # Rank biserial correlation if the 1 variable is continuous and the other is boolean
+          categ <- levels(x[,j])
+          idx1 <- which(x[,j]==categ[1])
+          idx2 <- which(x[,j]==categ[2])
+          data_ranked <- rank(x[,i])
+          corr_matrix[i,j] = 2*(mean(data_ranked[idx2])-mean(data_ranked[idx1]))/(dim(x)[1])
+          corr_matrix[j,i] = corr_matrix[i,j]
+        }
+        if(isfactor[i]==1 & isfactor[j]==0){
+          # Rank biserial correlation if the 1 variable is continuous and the other is binary
+          categ <- levels(x[,i])
+          idx1 <- which(x[,i]==categ[1])
+          idx2 <- which(x[,i]==categ[2])
+          data_ranked <- rank(x[,j])
+          corr_matrix[i,j] = 2*(mean(data_ranked[idx2])-mean(data_ranked[idx1]))/(dim(x)[1])
+          corr_matrix[j,i] = corr_matrix[i,j]
+        }
+        if(isfactor[i]==1 & isfactor[j]==1){
+          # Phi coefficient if the 2 variables are binary
+          t <- table(x[,i],x[,j])
+          corr_matrix[i,j] = (t[1,1]*t[2,2]-t[1,2]*t[2,1])/sqrt((t[1,1]+t[1,2])*(t[2,1]+t[2,2])*(t[1,1]+t[2,1])*(t[1,2]+t[2,2]))
+          corr_matrix[j,i] = corr_matrix[i,j]
+        }
+        
+      }
+    }
+  }
+  
+  return(corr_matrix)
+}
+
+
 ##############################################################################
 ############################## T-test univariate #############################
 ##############################################################################
@@ -243,7 +299,7 @@ groups = levels(df[,idx_Group])
 
 # discard NA
 idx_NA_Var = c(which(is.na(df[,idx_Var[1]])),which(is.na(df[,idx_Var[2]])))
-idx_NA_Var = sort(unique(idx_NA))
+idx_NA_Var = sort(unique(idx_NA_Var))
 idx_NA_Group = which(is.na(df[,idx_Group]))
 if (length(idx_NA_Var)==0 & length(idx_NA_Group)==0){
   Var_test = df[,idx_Var]
@@ -291,6 +347,60 @@ boxplot(y,main=groups[2])
 perm_t_test_mean_multivariate(x,y)
 perm_t_test_depth(x,y,iter=250) # this could be slow
 perm_manova(Var_test,Group_test)
+
+
+##############################################################################
+############### Test on correlation matrix of risk factors ###################
+##############################################################################
+
+idx_Var = c(12,13,155,173)
+idx_Group = 70
+groups = levels(df[,idx_Group])
+
+# discard NA
+idx_NA_Var = c()
+for (i in 1:length(idx_Var)){
+  idx_NA_Var = c(idx_NA_Var, which(is.na(df[,idx_Var[i]])))
+}
+idx_NA_Var = sort(unique(idx_NA_Var))
+Var_test = df[-idx_NA_Var,idx_Var]
+Group_test = df[-idx_NA_Var,idx_Group]
+x = Var_test[which(Group_test==groups[1]),]  
+y = Var_test[which(Group_test==groups[2]),]  
+
+# visualize and compute di correlation matrices
+corr_matrix_x <- correlation_matrix(x)
+corr_matrix_y <- correlation_matrix(y)
+norm(corr_matrix_x)
+norm(corr_matrix_y)
+image(corr_matrix_x)
+image(corr_matrix_y)
+
+# test
+iter = 1e3
+matrix_x_obs <- correlation_matrix(x)
+matrix_y_obs <- correlation_matrix(y)
+T0 <- sqrt(sum((matrix_x_obs - matrix_y_obs)^2))
+# T0 <- 1 - sum(diag(matrix_x_obs*matrix_y_obs))/(norm(matrix_x_obs,"F")*norm(matrix_y_obs,"F")) 
+x_pooled <- rbind(x,y)
+T_stat <- numeric(iter)
+n <- dim(x_pooled)[1]
+n1 <- dim(x)[1]
+for(perm in 1:iter){
+  # Permutation:
+  permutation <- sample(1:n)
+  x_pooled_perm <- x_pooled[permutation,]
+  x_perm <- x_pooled_perm[1:n1,]
+  y_perm <- x_pooled_perm[(n1+1):n,]
+  matrix_x_perm <- correlation_matrix(x_perm)
+  matrix_y_perm <- correlation_matrix(y_perm)
+  T_stat[perm] <- sqrt(sum((matrix_x_perm - matrix_y_perm)^2))
+  # T_stat[perm] <- 1 - sum(diag(matrix_x_perm*matrix_y_perm))/(norm(matrix_x_perm,"F")*norm(matrix_y_perm,"F")) 
+}
+#pvalue
+p_val <- sum(na.omit(T_stat)>=T0)/(iter-sum(is.na(T_stat)))
+p_val
+
 
 ##############################################################################
 ################################## RESULTS ###################################
@@ -353,6 +463,10 @@ perm_manova(Var_test,Group_test)
 # 52) V5 Calc I (66);      //           Control/Treat (3);    t_test_mean/median; 0/0;
 # 53) V5 Pl I (67);        //           Control/Treat (3);    t_test_mean/median; 0/0; 
 # Unfortunately the Gingival index at visit 1/3/5 are not significant for Pre-term Y/N and Low-weight Y/N 
+# 54) Correlation matrices;//           Control/Treat (3);    perm_corr_matrix;   0.05; 
+#     (considering Hypertension, Diabetes, BMI, Bacteria5, Antibodies)
+# 55) Correlation matrices;//           Control/Treat (3);    perm_corr_matrix;   0.008; 
+#     (considering Hypertension, Diabetes, BMI, Bacteria5, Bacteria5% Antibodies)
 
 ##############################################################################
 ################################ CONCLUSIONS #################################
@@ -369,3 +483,9 @@ perm_manova(Var_test,Group_test)
 # c) We can see which features contribute to have pre-term birth and low birthweight from the pvalue above:
 # e.g. diabetes and hypertension are higher in case of pre-term births, instead tobaccos/alcohol doesn't differ a lot for pre-term births but tobacco is significant for low birthweights;
 # e.g. less bacteria and more antibodies prevent the pre-term birth risk.
+
+# d) Correlations between risk factors are not high => they are separated and they contribute to the problem from different points of attack.
+#    Hence periodontal disease is a risk factor (it doesn't provokes hypertension, BMI, diabates... which give pre-term or low birthweight but it directly contributes to these birth-problems)
+
+# d) We have a significant difference in the correlation matrices of treatment and control group (above all considering Bacteria5 and/or Bacteria5%)
+#    Hence the risk factors act globally in different ways in the 2 groups and treatment has an effect on changing the behaviour of the risk factors.
