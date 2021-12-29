@@ -230,8 +230,8 @@ correlation_matrix = function(x){   # x = dataframe
 ############################## T-test univariate #############################
 ##############################################################################
 
-idx_Var = 47
-idx_Group = 3
+idx_Var = 50
+idx_Group = 70
 groups = levels(df[,idx_Group])
 
 # discard NA
@@ -263,9 +263,9 @@ if(length(idx_NA_Var)!=0 & length(idx_NA_Group)!=0) {
 }
 
 # Set threshold for numerical variable if wanted
-threshold = 50
-x = x[which(x >= threshold)]
-y = y[which(y >= threshold)]
+threshold = 240
+x = x[which(x <= threshold)]
+y = y[which(y <= threshold)]
 
 # Comparison with parametric case
 hist(x)
@@ -353,8 +353,8 @@ perm_manova(Var_test,Group_test)
 ############### Test on correlation matrix of risk factors ###################
 ##############################################################################
 
-idx_Var = c(12,13,155,173)
-idx_Group = 70
+idx_Var = c(12,13,48,50,155,173)
+idx_Group = 3
 groups = levels(df[,idx_Group])
 
 # discard NA
@@ -465,8 +465,8 @@ p_val
 # Unfortunately the Gingival index at visit 1/3/5 are not significant for Pre-term Y/N and Low-weight Y/N 
 # 54) Correlation matrices;//           Control/Treat (3);    perm_corr_matrix;   0.05; 
 #     (considering Hypertension, Diabetes, BMI, Bacteria5, Antibodies)
-# 55) Correlation matrices;//           Control/Treat (3);    perm_corr_matrix;   0.008; 
-#     (considering Hypertension, Diabetes, BMI, Bacteria5, Bacteria5% Antibodies)
+# 55) Correlation matrices;//           Control/Treat (3);    perm_corr_matrix;   0.034; 
+#     (considering Hypertension, Diabetes, BMI, V3 GE, V3 PD avg)
 
 ##############################################################################
 ################################ CONCLUSIONS #################################
@@ -487,5 +487,7 @@ p_val
 # d) Correlations between risk factors are not high => they are separated and they contribute to the problem from different points of attack.
 #    Hence periodontal disease is a risk factor (it doesn't provokes hypertension, BMI, diabates... which give pre-term or low birthweight but it directly contributes to these birth-problems)
 
-# d) We have a significant difference in the correlation matrices of treatment and control group (above all considering Bacteria5 and/or Bacteria5%)
-#    Hence the risk factors act globally in different ways in the 2 groups and treatment has an effect on changing the behaviour of the risk factors.
+# d) We have a significant difference in the correlation matrices of treatment and control group (above all considering data of visit 3 or 5 such as Bacteria5, Bacteria5%, V3 GE, V3 PD avg)
+#    Hence the risk factors act globally in different ways in the 2 groups and treatment has an effect on changing the behaviour of the risk factors (it gives less correlation between risk factors ==> not all the risk factors are high togheter ==> less risk)
+
+# e) If we consider the groups pre-term Y/N => no differences in the correlation matrices
