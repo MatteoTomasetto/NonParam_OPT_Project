@@ -21,13 +21,21 @@ library(ggplot2)
 library(knitr)
 library(broom)
 
-n <- dim(df)[1]
+n <- dim(df[,])[1]
 times <- df[,176]  # Delivery times; unit of measure = days
 lost_to_FU <- which(is.na(df[,70]))
 censoring <- rep(0,n)
 censoring[lost_to_FU] <- 1
 censoring <- factor(censoring, labels = (c('Event', 'Censor')))
 groups <- df$Group # select categorical variable significant for delivery times (see permutational inference results)
+
+# Consider "Control" group only
+nC <- dim(df[which(df$Group == 'C'),])[1]
+timesC <- df[which(df$Group == 'C'),176]  # Delivery times; unit of measure = days
+lost_to_FUC <- which(is.na(df[which(df$Group == 'C'),70]))
+censoringC <- rep(0,n)
+censoringC[lost_to_FUC] <- 1
+censoringC <- factor(censoringC, labels = (c('Event', 'Censor')))
 
 # Apply thresholding to see only pre-term birth
 threshold <- 230
@@ -105,7 +113,7 @@ hazard_ratio_threshold
 ################################# COX MODEL ##################################
 ##############################################################################
 
-cov1 <- df$BMI # select covariates significant for the delivery time
+cov1 <- scale(df$Antibodies) # select covariates significant for the delivery time
 cox <- coxph(Surv(times, censoring=="Event") ~ cov1)
 summary(cox)
 x11()
@@ -130,6 +138,35 @@ plot(KM_cov, conf.int=F,
 grid()
 legend('bottomleft', c("min", "mean", "max"),
        lty=c(1,1,1), lwd=c(2,2,2), col=c("dodgerblue2","navy","darkmagenta"))
+
+
+### Control group only
+cov1 <- scale(df$Antibodies[which(df$Group == 'C')]) # select covariates significant for the delivery time
+cox <- coxph(Surv(timesC, censoringC=="Event") ~ cov1)
+summary(cox)
+x11()
+ggforest(cox, data = as.data.frame(cbind(cov1,timesC,censoringC)))
+
+# Baseline survival curve
+x11()
+plot(survfit(cox, data=as.data.frame(cbind(cov1,cov2,times,censoring))), 
+     col="darkorange2", lwd=2, lty=1,
+     xlab='Time [days]', ylab='Survival Probability',
+     main='Baseline estimated survival probability')
+grid()
+
+# Plot the survival curve for different values of a covariate
+cov_values <- data.frame(cov1 = c(min(cov1[which(!is.na(cov1))]),mean(cov1[which(!is.na(cov1))]),max(cov1[which(!is.na(cov1))])))
+KM_cov <- survfit(cox, newdata = cov_values)
+x11()
+plot(KM_cov, conf.int=F,
+     col=c("dodgerblue2","navy","darkmagenta"), lwd=2, lty=1,
+     xlab='Time [days]', ylab='Survival Probability',
+     main='Adjusted Survival Probability Plot')
+grid()
+legend('bottomleft', c("min", "mean", "max"),
+       lty=c(1,1,1), lwd=c(2,2,2), col=c("dodgerblue2","navy","darkmagenta"))
+
 
 ### Consider the pre-term births only
 cov1_threshold <- df$BMI[which(times <= threshold)]  # select covariates significant for the delivery time (see permutational inference results)
@@ -216,9 +253,12 @@ test.ph_threshold
 #      higher indeces at BL ==> treatment ==> improvement of oral health ==> less pre-term births since it is protective.
 #
 #      Hence having a bad situation at BL (high indeces) results in a protective factor thanks to the treatment.
+# Gingival indeces at the baseline are protective factors also considering the Control group only: maybe the worst cases in control group are treated more (not as in treatment group) 
 
+##############################################################################
+#################### Data exploration for gengival indeces ###################
+##############################################################################
 
-# Data analysis for gengival indeces
 control.BL.GE <- df$BL.GE[which(df$Group == 'C')]
 treat.BL.GE <- df$BL.GE[which(df$Group == 'T')]
 control.BL.Calc.I <- df$BL.Calc.I[which(df$Group == 'C')]
@@ -252,3 +292,43 @@ boxplot(control.V5.PD.avg, treat.V5.PD.avg)
 
 # Treatment improve the oral health: indeed, at visit V3 and V5 (after some treatments), the indeces are lower!
 # Moreover patients with high indeces at the BL are treated (treated group has higher indeces at the BL) --> we could assess it by a permutational test
+
+
+##############################################################################
+################################## RISK ######################################
+##############################################################################
+
+HR <- list (Treat = 0.5,
+             Hypertension = 2.36,
+             Diabetes = 2.06,
+             Use.Tob = 1.32,
+             Age = 1.001,
+             BMI = 1.011,
+             BL.GE = 0.4356,
+             BL.PD.avg = 0.4965,
+             Bacteria = 0.8349,
+             Antibodies5 = 0.8937)
+
+Treat = (as.numeric(df$Group)-1)
+Treat[is.na(Treat)] <- 0
+Hypertension = (as.numeric(df$Hypertension)-1)
+Hypertension[is.na(Hypertension)] <- 0
+Diabetes = (as.numeric(df$Diabetes)-1)
+Diabetes[is.na(Diabetes)] <- 0
+Use.Tob = (as.numeric(df$Use.Tob)-1)
+Use.Tob[is.na(Use.Tob)] <- 0
+Age = scale(df$Age,center=1)
+Age[is.na(Age)] <- 0
+BMI = scale(df$BMI,center=1)
+BMI[is.na(BMI)] <- 0
+BL.GE = scale(df$BL.GE,center=1)
+BL.GE[is.na(BL.GE)] <- 0
+BL.PD.avg = scale(df$BL.PD.avg,center=1)
+BL.PD.avg[is.na(BL.PD.avg)] <- 0
+Bacteria = scale(df$Bacteria,center=1)
+Bacteria[is.na(Bacteria)] <- 0
+Antibodies5 = scale(df$Antibodies5, center=1)
+Antibodies5[is.na(Antibodies5)] <- 0
+             
+risk <- Treat*HR$Treat + Diabetes*HR$Diabetes + Hypertension*HR$Hypertension + Use.Tob*HR$Use.Tob + Age*HR$Age + BMI*HR$BMI + Bacteria*HR$Bacteria + Antibodies5*HR$Antibodies5 + BL.GE*HR$BL.GE + BL.PD.avg*HR$BL.PD.avg
+plot(risk, times)
