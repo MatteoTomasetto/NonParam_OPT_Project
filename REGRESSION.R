@@ -49,7 +49,7 @@ logistic_1regression_poly = function(y, x, deg, grid_h = 0.5, out = 0, out_idx =
   se.bands.logit = cbind(preds$fit +2* preds$se.fit , preds$fit -2*
                            preds$se.fit)
   se.bands = exp(se.bands.logit)/(1+ exp(se.bands.logit))
-  plot(x2, I(y2), xlim = range(age.grid), type = "n", ylim = c(0 ,.5) )
+  plot(x2, I(y2), xlim = range(age.grid), type = "n", ylim = c(0 ,.5))
   points (jitter(x2), I((y2)/4), cex = .5, pch = "|",
           col = " darkgrey ", main = 'Poly 4 Fit - Logistic')
   lines(age.grid, pfit, lwd = 2, col = " blue")
@@ -94,7 +94,7 @@ logistic_1regression_bsplines = function(y, x, knots, deg, grid_h = 0.5, out = 0
   se.bands.logit = cbind(preds$fit +2* preds$se.fit , preds$fit -2*
                            preds$se.fit)
   se.bands = exp(se.bands.logit)/(1+ exp(se.bands.logit))
-  plot(x2, I(y2), xlim = range(age.grid), type = "n", ylim = c(0 ,.5) )
+  plot(x2, I(y2), xlim = range(age.grid), type = "n", ylim = c(0 ,.5))
   points (jitter(x2), I((y2)/4), cex = .5, pch = "|",
           col = " darkgrey ", main = 'Poly 4 Fit - Logistic')
   lines(age.grid, pfit, lwd = 2, col = " blue")
@@ -126,7 +126,7 @@ logistic_1regression_Smoothingsplines = function(y, x, grid_h = 0.5, out = 0, ou
   x2 <- x2[!is.na(x2)]
   y2 <- dummy(y2)
   
-  m_list_logit <- gam(I(y2) ~ s(x2,bs='cr'),method="GCV.Cp", family='binomial')
+  m_list_logit <- gam(I(y2) ~ s(x2, bs='cr'),method="GCV.Cp", family='binomial')
   
   age.grid = seq(range(x2)[1], range(x2)[2], by = grid_h)
   
@@ -136,7 +136,7 @@ logistic_1regression_Smoothingsplines = function(y, x, grid_h = 0.5, out = 0, ou
   se.bands.logit = cbind(preds$fit +2* preds$se.fit , preds$fit -2*
                            preds$se.fit)
   se.bands = exp(se.bands.logit)/(1+ exp(se.bands.logit))
-  plot(x2, I(y2), xlim = range(age.grid), type = "n", ylim = c(0 ,.5) )
+  plot(x2, I(y2), xlim = range(age.grid), type = "n", ylim = c(0 ,.5) , xlab = 'bl_GE', ylab = 'I(preterm)' )
   points (jitter(x2), I((y2)/4), cex = .5, pch = "|",
           col = " darkgrey ", main = 'Poly 4 Fit - Logistic')
   lines(age.grid, pfit, lwd = 2, col = " blue")
@@ -158,16 +158,17 @@ logistic_1regression_Smoothingsplines = function(y, x, grid_h = 0.5, out = 0, ou
 logistic_1regression_Smoothingsplines_GAM = function(y, x, grid_h = 0.5, out = 0, out_idx = NULL){
   
   if (out == 1){
-    x <- x[-out_idx]
+    x <- x[-out_idx,]
     y <- y[-out_idx]
   }
   
-  x3 <- x[!is.na(y),]
-  y2 <- y[!is.na(y)]
-  x2 <- na.omit(x3)
-  
-  if(dim(x3)[1] != dim(x2)[1]){
-  y2 <- y2[-attr(x2,"na.action")]}
+  data <- data.frame(y,x)
+  p <- dim(x)[2]
+  pp <- p+1
+  dim(data)
+  data <- na.omit(data)
+  y2 <- data[,1]
+  x2 <- data[,2:pp]
   
   y2 <- dummy(y2)
   
@@ -180,12 +181,9 @@ logistic_1regression_Smoothingsplines_GAM = function(y, x, grid_h = 0.5, out = 0
   if( dim(x2)[2] == 3){
     m_list_logit <- gam(I(y2) ~ s(x2[,1], bs = 'cr') + s(x2[,2], bs = 'cr') + s(x2[,3], bs = 'cr') , family='binomial')}
   if( dim(x2)[2] == 2){
-    m_list_logit <- gam(I(y2) ~ s(x2[,1], bs = 'cr') + s(x2[,2], bs = 'cr') , scale = 1, method = 'REML', family='binomial')}
+    m_list_logit <- gam(I(y2) ~ s(x2[,1], bs = 'cr') + s(x2[,2], bs = 'cr') , family='binomial')}
   if( dim(x2)[2] == 1){
-    m_list_logit <- gam(I(y2) ~ s(x2[,1], bs = 'cr') , scale = 1, method = 'REML', family='binomial')}
-  
-  
-  age.grid = seq(range(x2)[1], range(x2)[2], by = grid_h)
+    m_list_logit <- gam(I(y2) ~ s(x2[,1], bs = 'cr') , family='binomial')}
   
   
   return(m_list_logit)
@@ -219,9 +217,6 @@ v5_plaque <- df[,67]
 v5_bacteria <- df[,146]
 apgar <- df[,74]
 
-x11()
-boxplot(bl_ge)
-
 # After many trials we find a good model which makes use of the Silness-Löe Gingival Index at baseline (first visit)
 # We first applied a polynomial regression
 logistic_1regression_poly(preterm,bl_ge,3,grid_h = 0.01)
@@ -230,9 +225,9 @@ logistic_1regression_poly(preterm,bl_ge,3,grid_h = 0.01)
 logistic_1regression_poly(preterm,bl_ge,2,grid_h = 0.01)
 
 # we can see that there the probability of having a preterm pregnacy increases for 
-#extreme values of the index
+# extreme values of the index
 # that is because for extreme values we have very few data, so we pass to a bspline 
-#regression in order to make a more precise prediction using knots were we have less data.
+# regression in order to make a more precise prediction using knots were we have less data.
 logistic_1regression_bsplines(preterm, bl_ge, knots = c(0.6,2.4), 3, grid_h = 0.001) 
 
 # we notice that there could be a leverage effect on the rigth, due to the more extreme 
@@ -252,14 +247,13 @@ logistic_1regression_bsplines(preterm, bl_ge, knots = c(0.6,2.4), 3, grid_h = 0.
 # among the ones with more severe periodontal conditions and so, after treatment they could 
 # have improved their conditions and have prevent the preterm birth. 
 
-# magari e' confermato da qualche test
 
 # This is in some sense confirmed by the fact that this behaviour is less pronounced if we look at data from 
 # the 5th visit. 
 logistic_1regression_bsplines(preterm, v5_ge, knots = c(0.8,1.5,2.1), 3, grid_h = 0.001) 
 
 # we also notice a strange behaviour of the curve of high value of v5_ge but we think is 
-# due to the fact that there are very few data for high value of ghe index in the last visit
+# due to the fact that there are very few data for high value of ge index in the last visit
 which(v5_ge > 2.3)
 
 # we try to use the smoothing splines 
@@ -280,19 +274,26 @@ anova(mod1)
 # another model using bl_ge, bl_pd and bl_plaque
 # and the last one using bl_ge and bl_plaque
 x2 <- cbind(bl_ge, bl_pd )
-x3 <- cbind(bl_ge, bl_bacteria, bl_pd)
+x3 <- cbind(bl_ge, bl_bacteria)
 x4 <- cbind(bl_ge, bl_plaque)
+x5 <- cbind(bl_ge, bl_calculus)
+x6 <- cbind(bl_ge, bl_bleeding)
 
 mod2 <- logistic_1regression_Smoothingsplines_GAM(preterm, x2 , grid_h = 0.001)
 anova(mod2)
 
-mod3 <- logistic_1regression_Smoothingsplines_GAM(preterm, x3 , grid_h = 0.001)
+mod3 <- logistic_1regression_Smoothingsplines_GAM(preterm, x3 , grid_h = 0.001, out = 1, out_idx = 94)
 anova(mod3)
 
 mod4 <- logistic_1regression_Smoothingsplines_GAM(preterm, x4 , grid_h = 0.001)
 anova(mod4)
 
+mod5 <- logistic_1regression_Smoothingsplines_GAM(preterm, x5 , grid_h = 0.001)
+anova(mod5)
+
+mod6 <- logistic_1regression_Smoothingsplines_GAM(preterm, x6 , grid_h = 0.001)
+anova(mod6)
+
 
 # now let's compare the model using the AIC index
-AIC(mod, mod1, mod2, mod3, mod4)
-
+AIC(mod, mod1, mod2, mod3, mod4, mod5, mod6)
