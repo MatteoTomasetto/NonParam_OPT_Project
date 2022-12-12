@@ -31,13 +31,13 @@ Data are available at https://higgi13425.github.io/medicaldata/reference/opt.htm
 
 - `TEST.R` contains the code to find risk factors and to assess the differences between the treatment and control groups via non parametric permutational tests
 
-- `BOOSTRAP.R` performs a bootstrap analysis for the mean and median of gestional age and birthweight in control and treatment groups 
+- `BOOSTRAP.R` performs a bootstrap analysis for the mean and median of gestational age and birthweight in control and treatment groups 
 
-- `CONFORMAL PREDICTION.R` contains the code to get a confidence interval for the mean and median of gestional age and birthweight in control and treatment groups 
+- `CONFORMAL PREDICTION.R` contains the code to get a confidence interval for the mean and median of gestational age and birthweight in control and treatment groups 
 
 - `REGRESSION.R` contains the code to model the probability of pre-term birth and low birthweight through some covaraites via non parametric B-Splines logistic regression
 
-- `SURVIVAL ANALYSIS.R` performs survival analysis for gestional age via non parametric tools such as Kaplan-Meier estimator, log-rank test and Cox model
+- `SURVIVAL ANALYSIS.R` performs survival analysis for gestational age via non parametric tools such as Kaplan-Meier estimator, log-rank test and Cox model
 
 - `PLOTS.R` contains the code to get some plots of interest for data exploration and analysis
 
