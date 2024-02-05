@@ -1,4 +1,4 @@
-# Obstetrics-and-Periodontal-Therapy-Analysis
+# Obstetrics and Periodontal Therapy Analysis
 
 Several observational studies on pregnant women have suggested an association
 between pre-term births and low birthweight with respect to periodontal
